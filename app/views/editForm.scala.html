@@ -1,4 +1,4 @@
-@(id: Long, computerForm: Form[Computer], companies : Seq[(String, String)])(implicit messages: Messages)
+@(id: Long, propertyForm: Form[Property])(implicit messages: Messages)
 
 @import helper._
 
@@ -11,18 +11,15 @@
     @form(routes.Application.update(id)) {
         
         <fieldset>
-        
-            @inputText(computerForm("name"), '_label -> "Computer name")
-            @inputText(computerForm("introduced"), '_label -> "Introduced date")
-            @inputText(computerForm("discontinued"), '_label -> "Discontinued date")
-            
-            @select(
-                computerForm("company"), 
-                companies, 
-                '_label -> "Company", '_default -> "-- Choose a company --",
-                '_showConstraints -> false
-            )
-        
+
+            @inputText(propertyForm("address"), '_label -> "address")
+            @inputText(propertyForm("postcode"), '_label -> "postcode")
+            @inputText(propertyForm("latitude"), '_label -> "latitude")
+            @inputText(propertyForm("longitude"), '_label -> "longitude")
+            @inputText(propertyForm("surface"), '_label -> "surface")
+            @inputText(propertyForm("bedrooms"), '_label -> "bedrooms")
+            @inputText(propertyForm("price"), '_label -> "price")
+
         </fieldset>
         
         <div class="actions">

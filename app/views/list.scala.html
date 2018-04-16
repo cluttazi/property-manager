@@ -1,4 +1,4 @@
-@(currentPage: Page[(Computer, Company)], currentOrderBy: Int, currentFilter: String)(implicit request: play.api.mvc.RequestHeader, flash: play.api.mvc.Flash, messages: Messages)
+@(currentPage: Page[(Property, PriceHistory)], currentOrderBy: Int, currentFilter: String)(implicit request: play.api.mvc.RequestHeader, flash: play.api.mvc.Flash, messages: Messages)
 
 @****************************************
 * Helper generating navigation links    *
@@ -21,7 +21,7 @@
 
 @main {
     
-    <h1>@Messages("computers.list.title", currentPage.total)</h1>
+    <h1>@Messages("properties.list.title", currentPage.total)</h1>
 
     @flash.get("success").map { message =>
         <div class="alert-message warning">
@@ -45,26 +45,41 @@
         <table class="computers zebra-striped">
             <thead>
                 <tr>
-                    @header(2, "Computer name")
-                    @header(3, "Introduced")
-                    @header(4, "Discontinued")
-                    @header(5, "Company")
+                    @header(2, "Address")
+                    @header(3, "Postcode")
+                    @header(4, "Latitude")
+                    @header(5, "Longitude")
+                    @header(6, "Surface")
+                    @header(7, "Bedrooms")
+                    @header(8, "Price")
                 </tr>
             </thead>
             <tbody>
 
-                @computers.map { 
-                    case (computer, company) => {
+                @properties.map {
+                    case (property, priceHistory) => {
                         <tr>
-                            <td><a href="@routes.Application.edit(computer.id.get)">@computer.name</a></td>
+                            <td><a href="@routes.Application.edit(property.id.get)">@property.id</a></td>
                             <td>
-                                @computer.introduced.map(_.format("dd MMM yyyy")).getOrElse { <em>-</em> }
+                                @property.address
                             </td>
                             <td>
-                                @computer.discontinued.map(_.format("dd MMM yyyy")).getOrElse { <em>-</em> }
+                                @property.postcode
                             </td>
                             <td>
-                                @company.name
+                                @property.latitude
+                            </td>
+                            <td>
+                                @property.longitude
+                            </td>
+                            <td>
+                                @property.surface.getOrElse { <em>-</em> }
+                            </td>
+                            <td>
+                                @property.bedrooms.getOrElse { <em>-</em> }
+                            </td>
+                            <td>
+                                @property.price.getOrElse { <em>-</em> }
                             </td>
                         </tr>
                     }

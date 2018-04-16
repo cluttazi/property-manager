@@ -11,8 +11,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 libraryDependencies ++= Seq(
   guice,
-  "com.typesafe.play" %% "play-slick" % "3.0.0",
-  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.0",
+  "com.typesafe.play" %% "play-slick" % "3.0.3",
+  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.3",
   "org.fluentlenium" % "fluentlenium-core" % "3.2.0",
   "com.typesafe.play" %% "play-jdbc-api" % play,
   "com.typesafe.play" %% "play-jdbc-evolutions" % play,

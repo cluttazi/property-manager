@@ -1,104 +1,108 @@
 package controllers
 
+import dao.{PricesHistoriesDAO, PropertiesDAO}
 import javax.inject.Inject
-
-import dao.{ CompaniesDAO, ComputersDAO }
-import models.Computer
+import models.Property
 import play.api.data.Form
-import play.api.data.Forms.{ date, longNumber, mapping, nonEmptyText, optional }
+import play.api.data.Forms.{longNumber, mapping, nonEmptyText, optional, _}
 import play.api.i18n.I18nSupport
-import play.api.mvc.{ AbstractController, ControllerComponents, Flash, RequestHeader }
+import play.api.mvc.{AbstractController, ControllerComponents}
 import views.html
 
 import scala.concurrent.ExecutionContext
 
 /** Manage a database of computers. */
-class Application @Inject() (
-    companiesDao: CompaniesDAO,
-    computersDao: ComputersDAO,
-    controllerComponents: ControllerComponents
-)(implicit executionContext: ExecutionContext) extends AbstractController(controllerComponents) with I18nSupport {
+class Application @Inject()(
+                             pricesHistoriesDAO: PricesHistoriesDAO,
+                             propertiesDAO: PropertiesDAO,
+                             controllerComponents: ControllerComponents
+                           )(implicit executionContext: ExecutionContext) extends AbstractController(controllerComponents) with I18nSupport {
 
-  /** This result directly redirect to the application home.*/
+  /** This result directly redirect to the application home. */
   val Home = Redirect(routes.Application.list(0, 2, ""))
 
-  /** Describe the computer form (used in both edit and create screens).*/
-  val computerForm = Form(
+  import play.api.data.format.Formats._
+
+  /** Describe the property form (used in both edit and create screens). */
+  val propertyForm = Form(
     mapping(
       "id" -> optional(longNumber),
-      "name" -> nonEmptyText,
-      "introduced" -> optional(date("yyyy-MM-dd")),
-      "discontinued" -> optional(date("yyyy-MM-dd")),
-      "company" -> optional(longNumber)
-    )(Computer.apply)(Computer.unapply)
+      "address" -> nonEmptyText,
+      "postcode" -> nonEmptyText,
+      "latitude" -> of(doubleFormat),
+      "longitude" -> of(doubleFormat),
+      "surface" -> optional(of(doubleFormat)),
+      "bedrooms" -> optional(number),
+      "price" -> optional(of(doubleFormat))
+    )(Property.apply)(Property.unapply)
   )
 
   // -- Actions
 
-  /** Handle default path requests, redirect to computers list */
-  def index = Action { Home }
-
-  /**
-   * Display the paginated list of computers.
-   *
-   * @param page Current page number (starts from 0)
-   * @param orderBy Column to be sorted
-   * @param filter Filter applied on computer names
-   */
-  def list(page: Int, orderBy: Int, filter: String) = Action.async { implicit request =>
-    val computers = computersDao.list(page = page, orderBy = orderBy, filter = ("%" + filter + "%"))
-    computers.map(cs => Ok(html.list(cs, orderBy, filter)))
+  /** Handle default path requests, redirect to property list */
+  def index = Action {
+    Home
   }
 
   /**
-   * Display the 'edit form' of a existing Computer.
-   *
-   * @param id Id of the computer to edit
-   */
-  def edit(id: Long) = Action.async { implicit rs =>
-    val computerAndOptions = for {
-      computer <- computersDao.findById(id)
-      options <- companiesDao.options()
-    } yield (computer, options)
+    * Display the paginated list of properties.
+    *
+    * @param page    Current page number (starts from 0)
+    * @param orderBy Column to be sorted
+    * @param filter  Filter applied on computer names
+    */
+  def list(page: Int, orderBy: Int, filter: String) = Action.async { implicit request =>
+    val properties = propertiesDAO.list(page = page, orderBy = orderBy, filter = ("%" + filter + "%"))
+    properties.map(cs => Ok(html.list(cs, orderBy, filter)))
+  }
 
-    computerAndOptions.map {
+  /**
+    * Display the 'edit form' of a existing Property.
+    *
+    * @param id Id of the property to edit
+    */
+  def edit(id: Long) = Action.async { implicit rs =>
+    val property = for {
+      property <- propertiesDAO.findById(id)
+    } yield (property)
+
+    property.map {
       case (computer, options) =>
         computer match {
-          case Some(c) => Ok(html.editForm(id, computerForm.fill(c), options))
+          case Some(c) => Ok(html.editForm(id, propertyForm.fill(c)))
           case None => NotFound
         }
     }
   }
 
   /**
-   * Handle the 'edit form' submission
-   *
-   * @param id Id of the computer to edit
-   */
+    * Handle the 'edit form' submission
+    *
+    * @param id Id of the property to edit
+    */
   def update(id: Long) = Action.async { implicit rs =>
-    computerForm.bindFromRequest.fold(
-      formWithErrors => companiesDao.options().map(options => BadRequest(html.editForm(id, formWithErrors, options))),
-      computer => {
+    propertyForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.editForm(id, formWithErrors)),
+      property => {
         for {
-          _ <- computersDao.update(id, computer)
-        } yield Home.flashing("success" -> "Computer %s has been updated".format(computer.name))
+          _ <- propertiesDAO.update(id, property)
+        } yield Home.flashing("success" -> s"Property ${id} has been updated")
       }
-    )
   }
 
-  /** Display the 'new computer form'. */
+  /** Display the 'new property form'. */
   def create = Action.async { implicit rs =>
-    companiesDao.options().map(options => Ok(html.createForm(computerForm, options)))
+     Ok(html.createForm(propertyForm))
   }
 
-  /** Handle the 'new computer form' submission. */
+  /** Handle the 'new property form' submission. */
   def save = Action.async { implicit rs =>
-    computerForm.bindFromRequest.fold(
-      formWithErrors => companiesDao.options().map(options => BadRequest(html.createForm(formWithErrors, options))),
-      computer => {
+    propertyForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(html.createForm(formWithErrors)),
+      property => {
         for {
-          _ <- computersDao.insert(computer)
-        } yield Home.flashing("success" -> "Computer %s has been created".format(computer.name))
+          _ <- propertiesDAO.insert(property)
+        } yield Home.flashing("success" -> s"Computer ${property} has been created")
       }
     )
   }
@@ -106,7 +110,7 @@ class Application @Inject() (
   /** Handle computer deletion. */
   def delete(id: Long) = Action.async { implicit rs =>
     for {
-      _ <- computersDao.delete(id)
+      _ <- propertiesDAO.delete(id)
     } yield Home.flashing("success" -> "Computer has been deleted")
   }
 }

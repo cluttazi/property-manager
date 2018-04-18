@@ -1,4 +1,4 @@
-@(id: Long, propertyForm: Form[Property])(implicit messages: Messages)
+@(id: Long, propertyForm: Form[Property])(implicit messages: Messages, request: play.api.mvc.RequestHeader)
 
 @import helper._
 
@@ -6,7 +6,7 @@
 
 @main {
     
-    <h1>Edit computer</h1>
+    <h1>Edit property</h1>
     
     @form(routes.Application.update(id)) {
         
@@ -21,16 +21,18 @@
             @inputText(propertyForm("price"), '_label -> "price")
 
         </fieldset>
-        
+
         <div class="actions">
-            <input type="submit" value="Save this computer" class="btn primary"> or 
+            @CSRF.formField
+            <input type="submit" value="Save this property" class="btn primary"> or 
             <a href="@routes.Application.list()" class="btn">Cancel</a> 
         </div>
         
     }
     
     @form(routes.Application.delete(id), 'class -> "topRight") {
-        <input type="submit" value="Delete this computer" class="btn danger">
+        @CSRF.formField
+        <input type="submit" value="Delete this property" class="btn danger">
     }
     
 }

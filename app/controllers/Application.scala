@@ -1,17 +1,20 @@
 package controllers
 
+import java.util.Date
+
 import dao.{PricesHistoriesDAO, PropertiesDAO}
 import javax.inject.Inject
-import models.Property
+import models.{PriceHistory, Property}
 import play.api.data.Form
 import play.api.data.Forms.{longNumber, mapping, nonEmptyText, optional, _}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{AbstractController, ControllerComponents}
+import utils.Enums
 import views.html
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-/** Manage a database of computers. */
+/** Manage a database of properties. */
 class Application @Inject()(
                              pricesHistoriesDAO: PricesHistoriesDAO,
                              propertiesDAO: PropertiesDAO,
@@ -49,7 +52,7 @@ class Application @Inject()(
     *
     * @param page    Current page number (starts from 0)
     * @param orderBy Column to be sorted
-    * @param filter  Filter applied on computer names
+    * @param filter  Filter applied on property names
     */
   def list(page: Int, orderBy: Int, filter: String) = Action.async { implicit rs =>
     val properties = propertiesDAO.list(page = page, orderBy = orderBy, filter = ("%" + filter + "%"))
@@ -63,7 +66,7 @@ class Application @Inject()(
     * @param id Id of the property to edit
     */
   def edit(id: Long) = Action.async { implicit rs =>
-    val futureProperty = propertiesDAO.findById(id)
+    val futureProperty : Future[Option[Property]] = propertiesDAO.findById(id)
     futureProperty.map(i => Ok(html.editForm(id, propertyForm.fill(i.get))))
   }
 
@@ -79,7 +82,10 @@ class Application @Inject()(
       },
       property => {
         for {
-          _ <- propertiesDAO.update(id, property)
+          _ <- {
+            propertiesDAO.update(id, property)
+            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), property.id, new Date, property.price))
+          }
         } yield
           Home.flashing("success" -> s"Property ${id} has been updated")
       }
@@ -101,8 +107,11 @@ class Application @Inject()(
       },
       property => {
         for {
-          _ <- propertiesDAO.insert(property)
-        } yield Home.flashing("success" -> s"Computer ${property} has been created")
+          _ <- {
+            propertiesDAO.insert(property)
+            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), property.id, new Date, property.price))
+          }
+        } yield Home.flashing("success" -> s"Property ${property} has been created")
       }
     )
   }
@@ -110,7 +119,10 @@ class Application @Inject()(
   /** Handle computer deletion. */
   def delete(id: Long) = Action.async { implicit rs =>
     for {
-      _ <- propertiesDAO.delete(id)
-    } yield Home.flashing("success" -> "Computer has been deleted")
+      _ <- {
+        propertiesDAO.delete(id)
+        pricesHistoriesDAO.deleteByProperty(id)
+      }
+    } yield Home.flashing("success" -> "Property has been deleted")
   }
 }

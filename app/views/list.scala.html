@@ -32,11 +32,11 @@ if(orderBy == scala.math.abs(currentOrderBy)) -currentOrderBy else orderBy
 <div id="actions">
 
     @helper.form(action=routes.Application.list()) {
-    <input type="search" id="searchbox" name="f" value="@currentFilter" placeholder="Filter by computer name..."/>
-    <input type="submit" id="searchsubmit" value="Filter by name" class="btn primary"/>
+    <input type="search" id="searchbox" name="f" value="@currentFilter" placeholder="Filter by property address..."/>
+    <input type="submit" id="searchsubmit" value="Filter by address" class="btn primary"/>
     }
 
-    <a class="btn success" id="add" href="@routes.Application.create()">Add a new computer</a>
+    <a class="btn success" id="add" href="@routes.Application.create()">Add a new property</a>
 
 </div>
 
@@ -45,6 +45,7 @@ if(orderBy == scala.math.abs(currentOrderBy)) -currentOrderBy else orderBy
 <table class="properties zebra-striped">
     <thead>
     <tr>
+        @header(1, "Id")
         @header(2, "Address")
         @header(3, "Postcode")
         @header(4, "Latitude")

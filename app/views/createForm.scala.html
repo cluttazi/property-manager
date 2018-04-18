@@ -1,4 +1,4 @@
-@(propertyForm: Form[Property])(implicit messages: Messages)
+@(propertyForm: Form[Property])(implicit messages: Messages, request: play.api.mvc.RequestHeader)
 
 @import helper._
 
@@ -6,7 +6,7 @@
 
 @main {
 
-    <h1>Add a computer</h1>
+    <h1>Add a property</h1>
 
     @form(routes.Application.save()) {
 
@@ -24,7 +24,8 @@
         </fieldset>
 
         <div class="actions">
-            <input type="submit" value="Create this computer" class="btn primary"> or
+            @CSRF.formField
+            <input type="submit" value="Create this property" class="btn primary"> or
             <a href="@routes.Application.list()" class="btn">Cancel</a>
         </div>
 

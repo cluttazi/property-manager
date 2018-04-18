@@ -14,16 +14,18 @@ trait PricesHistoriesComponent {
 
   import profile.api._
 
-  class PricesHistories(tag: Tag) extends Table[PriceHistory](tag, "PRICEHISTORY") {
+  class PricesHistories(tag: Tag) extends Table[PriceHistory](tag, PriceHistory.getClass.getSimpleName.toUpperCase.dropRight(1)) {
     implicit val dateColumnType = MappedColumnType.base[Date, Long](d => d.getTime, d => new Date(d))
 
-    def property = column[Option[Long]]("PROPERTY", O.PrimaryKey)
+    def id = column[Option[Long]]("ID", O.PrimaryKey, O.AutoInc)
 
-    def date = column[Date]("DATE", O.PrimaryKey)
+    def property = column[Option[Long]]("PROPERTY")
+
+    def timestamp = column[Date]("TIMESTAMP")
 
     def price = column[Double]("PRICE")
 
-    def * = (property, date, price) <> (PriceHistory.tupled, PriceHistory.unapply _)
+    def * = (id, property, timestamp, price) <> (PriceHistory.tupled, PriceHistory.unapply _)
   }
 
 }
@@ -37,15 +39,6 @@ class PricesHistoriesDAO @Inject()(protected val dbConfigProvider: DatabaseConfi
 
   val pricesHistories = TableQuery[PricesHistories]
 
-  //  /** Construct the Map[Date, Double] needed to fill a select options set */
-  //  def options(): Future[Seq[(Date, Double)]] = {
-  //    val query = for {
-  //      priceHistory <- pricesHistories
-  //    } yield (priceHistory.date, priceHistory.price) //.sortBy(/*date*/ _)
-  //
-  //    db.run(query.result).map(rows => rows.map { case (date, price) => (date, price) })
-  //  }
-
   /** Insert a new price */
   def insert(priceHistory: PriceHistory): Future[Unit] =
     db.run(pricesHistories += priceHistory).map(_ => ())
@@ -53,5 +46,9 @@ class PricesHistoriesDAO @Inject()(protected val dbConfigProvider: DatabaseConfi
   /** Retrieve a list of prices from a property id. */
   def findByProperty(property: Long): Future[Seq[PriceHistory]] =
     db.run(pricesHistories.filter(_.property === property).result)
+
+  /** Delete a priceHistory. */
+  def deleteByProperty(id: Long): Future[Unit] =
+    db.run(pricesHistories.filter(_.property === id).delete).map(_ => ())
 
 }

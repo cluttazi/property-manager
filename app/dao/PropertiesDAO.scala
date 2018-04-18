@@ -2,11 +2,11 @@ package dao
 
 import java.util.Date
 
-import utils.Enums
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
+import utils.Enums
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,7 +16,7 @@ class PropertiesDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   import profile.api._
 
-  class Properties(tag: Tag) extends Table[Property](tag, "PROPERTY") {
+  class Properties(tag: Tag) extends Table[Property](tag, Property.getClass.getSimpleName.toUpperCase.dropRight(1)) {
 
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
 
@@ -68,7 +68,10 @@ class PropertiesDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
     for {
       totalRows <- count(filter)
-      list = query.result.map { rows => rows.collect { case (property, priceHistory) => (property, priceHistory.get) } }
+      list = query.result.map { rows =>
+        rows.collect { case (property, priceHistory) => (property, priceHistory.getOrElse(Enums.emptyPriceHistory))
+        }
+      }
       result <- db.run(list)
     } yield Page(result, page, offset, totalRows)
   }
@@ -80,6 +83,7 @@ class PropertiesDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   /** Update a property. */
   def update(id: Long, property: Property): Future[Unit] = {
     val propertyToUpdate: Property = property.copy(Some(id))
+
     db.run(properties.filter(_.id === id).update(propertyToUpdate)).map(_ => ())
   }
 

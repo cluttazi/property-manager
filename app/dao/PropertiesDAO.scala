@@ -2,6 +2,7 @@ package dao
 
 import java.util.Date
 
+import utils.Enums
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -31,7 +32,7 @@ class PropertiesDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
     def bedrooms = column[Option[Int]]("BEDROOMS")
 
-    def price = column[Option[Double]]("PRICE")
+    def price = column[Double]("PRICE")
 
     def * = (id.?, address, postcode, latitude, longitude, surface, bedrooms, price) <> (Property.tupled, Property.unapply _)
   }
@@ -61,13 +62,13 @@ class PropertiesDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       (for {
         (property, priceHistory) <- properties joinLeft pricesHistories on (_.id === _.property)
         if property.postcode.toLowerCase like filter.toLowerCase
-      } yield (property, priceHistory.map(_.date), priceHistory.map(_.price)))
+      } yield (property, priceHistory))
         .drop(offset)
         .take(pageSize)
 
     for {
       totalRows <- count(filter)
-      list = query.result.map { rows => rows.collect { case (property, date, price) => (property, date, price) } }
+      list = query.result.map { rows => rows.collect { case (property, priceHistory) => (property, priceHistory.get) } }
       result <- db.run(list)
     } yield Page(result, page, offset, totalRows)
   }

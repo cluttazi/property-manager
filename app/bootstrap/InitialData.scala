@@ -35,5 +35,5 @@ private[bootstrap] object InitialData {
   def pricesHistories = PriceHistory(Option(1L), new Date, 100.0)
 
   def properties = Property(Option(1L), "One Address", "12345",
-    33.00, 33.00, None, None, Option(1L))
+    33.00, 33.00, None, None, 1L)
 }

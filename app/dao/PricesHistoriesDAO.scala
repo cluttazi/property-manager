@@ -51,7 +51,7 @@ class PricesHistoriesDAO @Inject()(protected val dbConfigProvider: DatabaseConfi
     db.run(pricesHistories += priceHistory).map(_ => ())
 
   /** Retrieve a list of prices from a property id. */
-  def findByProperty(property: Long): Future[Seq[(Date, Double)]] =
-    db.run(pricesHistories.filter(_.property === property).map(p => (p.date, p.price)).result)
+  def findByProperty(property: Long): Future[Seq[PriceHistory]] =
+    db.run(pricesHistories.filter(_.property === property).result)
 
 }

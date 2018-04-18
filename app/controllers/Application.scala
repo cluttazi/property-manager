@@ -33,7 +33,7 @@ class Application @Inject()(
       "longitude" -> of(doubleFormat),
       "surface" -> optional(of(doubleFormat)),
       "bedrooms" -> optional(number),
-      "price" -> optional(of(doubleFormat))
+      "price" -> of(doubleFormat)
     )(Property.apply)(Property.unapply)
   )
 
@@ -51,10 +51,11 @@ class Application @Inject()(
     * @param orderBy Column to be sorted
     * @param filter  Filter applied on computer names
     */
-  def list(page: Int, orderBy: Int, filter: String) = Action.async { implicit request =>
+  def list(page: Int, orderBy: Int, filter: String) = Action.async { implicit rs =>
     val properties = propertiesDAO.list(page = page, orderBy = orderBy, filter = ("%" + filter + "%"))
     properties.map(cs => Ok(html.list(cs, orderBy, filter)))
   }
+
 
   /**
     * Display the 'edit form' of a existing Property.
@@ -62,17 +63,8 @@ class Application @Inject()(
     * @param id Id of the property to edit
     */
   def edit(id: Long) = Action.async { implicit rs =>
-    val property = for {
-      property <- propertiesDAO.findById(id)
-    } yield (property)
-
-    property.map {
-      case (computer, options) =>
-        computer match {
-          case Some(c) => Ok(html.editForm(id, propertyForm.fill(c)))
-          case None => NotFound
-        }
-    }
+    val futureProperty = propertiesDAO.findById(id)
+    futureProperty.map(i => Ok(html.editForm(id, propertyForm.fill(i.get))))
   }
 
   /**
@@ -82,23 +74,31 @@ class Application @Inject()(
     */
   def update(id: Long) = Action.async { implicit rs =>
     propertyForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.editForm(id, formWithErrors)),
+      formWithErrors => scala.concurrent.Future {
+        BadRequest(html.editForm(id, formWithErrors))
+      },
       property => {
         for {
           _ <- propertiesDAO.update(id, property)
-        } yield Home.flashing("success" -> s"Property ${id} has been updated")
+        } yield
+          Home.flashing("success" -> s"Property ${id} has been updated")
       }
+    )
   }
 
   /** Display the 'new property form'. */
   def create = Action.async { implicit rs =>
-     Ok(html.createForm(propertyForm))
+    scala.concurrent.Future {
+      Ok(html.createForm(propertyForm))
+    }
   }
 
   /** Handle the 'new property form' submission. */
   def save = Action.async { implicit rs =>
     propertyForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.createForm(formWithErrors)),
+      formWithErrors => scala.concurrent.Future {
+        BadRequest(html.createForm(formWithErrors))
+      },
       property => {
         for {
           _ <- propertiesDAO.insert(property)

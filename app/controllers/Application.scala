@@ -57,6 +57,17 @@ class Application @Inject()(
     properties.map(cs => Ok(html.list(cs, orderBy, filter)))
   }
 
+  /**
+    * Display the paginated list of prices.
+    *
+    * @param page    Current page number (starts from 0)
+    * @param orderBy Column to be sorted
+    * @param filter  Filter applied on property names
+    */
+  def listPrices(page: Int, orderBy: Int, filter: String) = Action.async { implicit rs =>
+    val properties = pricesHistoriesDAO.list(page = page, orderBy = orderBy, filter = ("%" + filter + "%"))
+    properties.map(cs => Ok(html.listPrices(cs, orderBy, filter)))
+  }
 
   /**
     * Display the 'edit form' of a existing Property.
@@ -82,7 +93,7 @@ class Application @Inject()(
         for {
           _ <- {
             propertiesDAO.update(id, property)
-            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), property.id, System.currentTimeMillis, property.price))
+            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), Some(id), System.currentTimeMillis, property.price))
           }
         } yield
           Home.flashing("success" -> s"Property ${id} has been updated")
@@ -107,7 +118,6 @@ class Application @Inject()(
         for {
           _ <- {
             propertiesDAO.insert(property)
-            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), property.id, System.currentTimeMillis, property.price))
           }
         } yield Home.flashing("success" -> s"Property ${property} has been created")
       }

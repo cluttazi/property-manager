@@ -8,6 +8,9 @@ GET     /                           controllers.Application.index
 # Properties list (look at the default values for pagination parameters)
 GET     /properties                  controllers.Application.list(p:Int ?= 0, s:Int ?= 2, f ?= "")
 
+# Properties list (look at the default values for pagination parameters)
+GET     /prices                     controllers.Application.listPrices(p:Int ?= 0, s:Int ?= 2, f ?= "")
+
 # Add property
 GET     /properties/new              controllers.Application.create
 POST    /properties                  controllers.Application.save

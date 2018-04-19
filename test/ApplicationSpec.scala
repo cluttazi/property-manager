@@ -5,6 +5,7 @@ import play.api.test.WithApplication
 import play.api.test.FakeRequest
 import play.api.Application
 
+//todo fix random CSRF issue
 class ApplicationSpec extends PlaySpecification {
 
   // -- Date helpers
@@ -49,28 +50,35 @@ class ApplicationSpec extends PlaySpecification {
 
       val badDateFormat = applicationController.save(
         FakeRequest().withFormUrlEncodedBody(
-          "name" -> "FooBar",
-          "introduced" -> "badbadbad",
-          "company" -> "1")
+          "address" -> "New Address",
+          "postcode" -> "54321",
+          "latitude" -> "34",
+          "longitude" -> "34",
+          "bedrooms" -> "2",
+          "surface" -> "3.4",
+          "price" -> "badbadbad")
       )
 
       status(badDateFormat) must equalTo(BAD_REQUEST)
-      contentAsString(badDateFormat) must contain("""<option value="1" selected="selected">Apple Inc.</option>""")
-      contentAsString(badDateFormat) must contain("""<input type="text" id="introduced" name="introduced" value="badbadbad" />""")
-      contentAsString(badDateFormat) must contain("""<input type="text" id="name" name="name" value="FooBar" />""")
+      contentAsString(badDateFormat) must contain("""<input type="text" id="price" name="price" value="badbadbad" />""")
+      contentAsString(badDateFormat) must contain("""<input type="text" id="name" name="name" value="New Address" />""")
 
       val result = applicationController.save(
         FakeRequest().withFormUrlEncodedBody(
-          "name" -> "FooBar",
-          "introduced" -> "2011-12-24",
-          "company" -> "1")
+          "address" -> "New Address",
+          "postcode" -> "54321",
+          "latitude" -> "34",
+          "longitude" -> "34",
+          "bedrooms" -> "2",
+          "surface" -> "3.4",
+          "price" -> "2.0")
       )
 
       status(result) must equalTo(SEE_OTHER)
       redirectLocation(result) must beSome.which(_ == "/properties")
-      flash(result).get("success") must beSome.which(_ == "property FooBar has been created")
+      flash(result).get("success") must beSome.which(_ == "property New Address has been created")
 
-      val list = applicationController.list(0, 2, "FooBar")(FakeRequest())
+      val list = applicationController.list(0, 2, "54321")(FakeRequest())
 
       status(list) must equalTo(OK)
       contentAsString(list) must contain("One property found")

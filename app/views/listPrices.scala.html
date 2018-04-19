@@ -1,4 +1,4 @@
-@(currentPage: Page[Property], currentOrderBy: Int, currentFilter: String)(implicit request: play.api.mvc.RequestHeader, flash: play.api.mvc.Flash, messages: Messages)
+@(currentPage: Page[PriceHistory], currentOrderBy: Int, currentFilter: String)(implicit request: play.api.mvc.RequestHeader, flash: play.api.mvc.Flash, messages: Messages)
 
 @****************************************
 * Helper generating navigation links    *
@@ -21,7 +21,7 @@ if(orderBy == scala.math.abs(currentOrderBy)) -currentOrderBy else orderBy
 
 @main {
 
-<h1>@Messages("properties.list.title", currentPage.total)</h1>
+<h1>@Messages("prices.list.title", currentPage.total)</h1>
 
 @flash.get("success").map { message =>
 <div class="alert-message warning">
@@ -29,58 +29,33 @@ if(orderBy == scala.math.abs(currentOrderBy)) -currentOrderBy else orderBy
 </div>
 }
 
-<div id="actions">
-
-    @helper.form(action=routes.Application.list()) {
-    <input type="search" id="searchbox" name="f" value="@currentFilter" placeholder="Filter by property postcode..."/>
-    <input type="submit" id="searchsubmit" value="Filter by postcode" class="btn primary"/>
-    }
-
-    <a class="btn success" id="add" href="@routes.Application.create()">Add a new property</a>
-
-</div>
-
-@Option(currentPage.items).filterNot(_.isEmpty).map { properties =>
+@Option(currentPage.items).filterNot(_.isEmpty).map { prices =>
 
 <table class="properties zebra-striped">
     <thead>
     <tr>
         @header(1, "Id")
-        @header(2, "Address")
-        @header(3, "Postcode")
-        @header(4, "Latitude")
-        @header(5, "Longitude")
-        @header(6, "Surface")
-        @header(7, "Bedrooms")
-        @header(8, "Price")
+        @header(2, "Property")
+        @header(3, "Timestamp")
+        @header(4, "Price")
     </tr>
     </thead>
     <tbody>
 
-    @properties.map {
-    case (property) => {
+    @prices.map {
+    case (price) => {
     <tr>
-        <td><a href="@routes.Application.edit(property.id.get)">@property.id</a></td>
         <td>
-            @property.address
+            @price.id
         </td>
         <td>
-            @property.postcode
+            @price.property
         </td>
         <td>
-            @property.latitude
+            @price.timestamp
         </td>
         <td>
-            @property.longitude
-        </td>
-        <td>
-            @property.surface.getOrElse { <em>-</em> }
-        </td>
-        <td>
-            @property.bedrooms.getOrElse { <em>-</em> }
-        </td>
-        <td>
-            @property.price
+            @price.price
         </td>
     </tr>
     }
@@ -101,7 +76,7 @@ if(orderBy == scala.math.abs(currentOrderBy)) -currentOrderBy else orderBy
         </li>
         }
         <li class="current">
-            <a>Displaying @(currentPage.offset + 1) to @(currentPage.offset + properties.size) of @currentPage.total</a>
+            <a>Displaying @(currentPage.offset + 1) to @(currentPage.offset + prices.size) of @currentPage.total</a>
         </li>
         @currentPage.next.map { page =>
         <li class="next">

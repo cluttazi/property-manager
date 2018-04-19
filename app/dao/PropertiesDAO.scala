@@ -4,7 +4,6 @@ import javax.inject.{Inject, Singleton}
 import models._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
-import utils.Enums
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -52,21 +51,24 @@ class PropertiesDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     db.run(properties.filter { property => property.postcode.toLowerCase like filter.toLowerCase }.length.result)
   }
 
-  /** Return a page of (Property,Price) */
-  def list(page: Int = 0, pageSize: Int = 10, orderBy: Int = 1, filter: String = "%"): Future[Page[(Property, PriceHistory)]] = {
+  /** Return a page of (Property) */
+  def list(page: Int = 0, pageSize: Int = 10, orderBy: Int = 1, filter: String = "%"): Future[Page[(Property)]] = {
+
     val offset = pageSize * page
     val query =
       (for {
-        (property, priceHistory) <- properties joinLeft pricesHistories on (_.id === _.property)
+        property <- properties
         if property.postcode.toLowerCase like filter.toLowerCase
-      } yield (property, priceHistory))
+      } yield (property))
         .drop(offset)
         .take(pageSize)
 
     for {
       totalRows <- count(filter)
       list = query.result.map { rows =>
-        rows.collect { case (property, priceHistory) => (property, priceHistory.getOrElse(Enums.emptyPriceHistory))
+        rows.collect { case (property) => {
+          (property)
+        }
         }
       }
       result <- db.run(list)

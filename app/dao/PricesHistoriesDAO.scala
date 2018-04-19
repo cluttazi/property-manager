@@ -1,9 +1,7 @@
 package dao
 
-import java.util.Date
-
 import javax.inject.{Inject, Singleton}
-import models.{PriceHistory, Property}
+import models.PriceHistory
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 
@@ -15,13 +13,12 @@ trait PricesHistoriesComponent {
   import profile.api._
 
   class PricesHistories(tag: Tag) extends Table[PriceHistory](tag, PriceHistory.getClass.getSimpleName.toUpperCase.dropRight(1)) {
-    implicit val dateColumnType = MappedColumnType.base[Date, Long](d => d.getTime, d => new Date(d))
 
     def id = column[Option[Long]]("ID", O.PrimaryKey, O.AutoInc)
 
     def property = column[Option[Long]]("PROPERTY")
 
-    def timestamp = column[Date]("TIMESTAMP")
+    def timestamp = column[Long]("TIMESTAMP")
 
     def price = column[Double]("PRICE")
 

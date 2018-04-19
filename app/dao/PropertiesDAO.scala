@@ -1,7 +1,5 @@
 package dao
 
-import java.util.Date
-
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
@@ -56,7 +54,6 @@ class PropertiesDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   /** Return a page of (Property,Price) */
   def list(page: Int = 0, pageSize: Int = 10, orderBy: Int = 1, filter: String = "%"): Future[Page[(Property, PriceHistory)]] = {
-    implicit val dateColumnType = MappedColumnType.base[Date, Long](d => d.getTime, d => new Date(d))
     val offset = pageSize * page
     val query =
       (for {

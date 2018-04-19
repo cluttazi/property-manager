@@ -32,8 +32,8 @@ private[bootstrap] class InitialData @Inject()(propertiesDAO: PropertiesDAO,
 private[bootstrap] object InitialData {
   private val sdf = new SimpleDateFormat("yyyy-MM-dd")
 
-  def pricesHistories = PriceHistory(Option(0L), Option(1L), new Date, 100.0)
+  def pricesHistories = PriceHistory(Option(0L), Option(1L), System.currentTimeMillis, 100.0)
 
   def properties = Property(Option(1L), "One Address", "12345",
-    33.00, 33.00, None, None, 1L)
+    33.00, 33.00, None, None, 100.0)
 }

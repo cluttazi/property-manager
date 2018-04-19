@@ -16,47 +16,44 @@ class IntegrationSpec extends Specification {
       running(TestServer(port), HTMLUNIT) { browser =>
         browser.goTo("http://localhost:" + port)
 
-        browser.$("header h1").first.text() must equalTo("Play sample application — Computer database")
-        browser.$("section h1").first.text() must equalTo("574 computers found")
+        browser.$("header h1").first.text() must equalTo("Property Manager")
+        browser.$("section h1").first.text() must equalTo("One property found")
 
-        browser.$("#pagination li.current").first.text() must equalTo("Displaying 1 to 10 of 574")
+        browser.$("#pagination li.current").first.text() must equalTo("Displaying 1 to 1 of 1")
 
-        browser.$("#pagination li.next a").click()
-
-        browser.$("#pagination li.current").first.text() must equalTo("Displaying 11 to 20 of 574")
-        browser.$("#searchbox").write("Apple")
+        browser.$("#searchbox").write("12345")
         browser.$("#searchsubmit").click()
 
-        browser.$("section h1").first.text() must equalTo("13 computers found")
-        browser.$("section table tbody tr td a", withText("Apple II")).click()
+        browser.$("section h1").first.text() must equalTo("One property found")
+        browser.$("section table tbody tr td a", withText("1")).click()
 
-        browser.$("section h1").first.text() must equalTo("Edit computer")
+        browser.$("section h1").first.text() must equalTo("Edit property")
 
-        browser.$("#discontinued").write("xxx")
+        browser.$("#price").write("asd")
         browser.$("input.primary").click()
 
         browser.$("div.error").size must equalTo(1)
-        browser.$("div.error label").first.text() must equalTo("Discontinued date")
+        browser.$("div.error label").first.text() must equalTo("price")
 
-        browser.$("#discontinued").write("")
+        browser.$("#price").write("2.0")
         browser.$("input.primary").click()
 
-        browser.$("section h1").first.text() must equalTo("574 computers found")
-        browser.$(".alert-message").first.text() must equalTo("Done! Computer Apple II has been updated")
+        browser.$("section h1").first.text() must equalTo("One property found")
+        browser.$(".alert-message").first.text() must equalTo("Done! Property 1 has been updated")
 
-        browser.$("#searchbox").write("Apple")
+        browser.$("#searchbox").write("12345")
         browser.$("#searchsubmit").click()
 
-        browser.$("a", withText("Apple II")).click()
+        browser.$("a", withText("1")).click()
         browser.$("input.danger").click()
 
-        browser.$("section h1").first.text() must equalTo("573 computers found")
-        browser.$(".alert-message").first.text() must equalTo("Done! Computer has been deleted")
+        browser.$("section h1").first.text() must equalTo("No properties found")
+        browser.$(".alert-message").first.text() must equalTo("Done! Property has been deleted")
 
-        browser.$("#searchbox").write("Apple")
+        browser.$("#searchbox").write("1")
         browser.$("#searchsubmit").click()
 
-        browser.$("section h1").first.text() must equalTo("12 computers found")
+        browser.$("section h1").first.text() must equalTo("No properties found")
       }
     }
 

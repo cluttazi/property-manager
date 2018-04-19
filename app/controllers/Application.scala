@@ -1,7 +1,5 @@
 package controllers
 
-import java.util.Date
-
 import dao.{PricesHistoriesDAO, PropertiesDAO}
 import javax.inject.Inject
 import models.{PriceHistory, Property}
@@ -66,7 +64,7 @@ class Application @Inject()(
     * @param id Id of the property to edit
     */
   def edit(id: Long) = Action.async { implicit rs =>
-    val futureProperty : Future[Option[Property]] = propertiesDAO.findById(id)
+    val futureProperty: Future[Option[Property]] = propertiesDAO.findById(id)
     futureProperty.map(i => Ok(html.editForm(id, propertyForm.fill(i.get))))
   }
 
@@ -84,7 +82,7 @@ class Application @Inject()(
         for {
           _ <- {
             propertiesDAO.update(id, property)
-            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), property.id, new Date, property.price))
+            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), property.id, System.currentTimeMillis, property.price))
           }
         } yield
           Home.flashing("success" -> s"Property ${id} has been updated")
@@ -109,7 +107,7 @@ class Application @Inject()(
         for {
           _ <- {
             propertiesDAO.insert(property)
-            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), property.id, new Date, property.price))
+            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), property.id, System.currentTimeMillis, property.price))
           }
         } yield Home.flashing("success" -> s"Property ${property} has been created")
       }

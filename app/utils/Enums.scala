@@ -8,7 +8,7 @@ class Enums {
   val emptyDouble: Double = Double.NaN
   val emptyLong: Long = 0L
   val emptyDate: Date = new Date(emptyLong)
-  val emptyPriceHistory: PriceHistory = PriceHistory(Some(emptyLong), Some(emptyLong), emptyDate, this.emptyDouble)
+  val emptyPriceHistory: PriceHistory = PriceHistory(Some(emptyLong), Some(emptyLong), emptyLong, this.emptyDouble)
 }
 
 object Enums extends Enums

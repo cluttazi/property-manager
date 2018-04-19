@@ -20,35 +20,38 @@ class ApplicationSpec extends PlaySpecification {
       app2ApplicationController(app)
     }
 
-    "redirect to the computer list on /" in new WithApplication {
+    "redirect to the property list on /" in new WithApplication {
       val result = applicationController.index(FakeRequest())
 
       status(result) must equalTo(SEE_OTHER)
-      redirectLocation(result) must beSome.which(_ == "/computers")
+      redirectLocation(result) must beSome.which(_ == "/properties")
     }
 
-    "list computers on the the first page" in new WithApplication {
+    "list properties on the the first page" in new WithApplication {
       val result = applicationController.list(0, 2, "")(FakeRequest())
 
       status(result) must equalTo(OK)
-      contentAsString(result) must contain("574 computers found")
+      contentAsString(result) must contain("One property found")
     }
 
-    "filter computer by name" in new WithApplication {
-      val result = applicationController.list(0, 2, "Apple")(FakeRequest())
+    "filter property by postcode" in new WithApplication {
+      val result = applicationController.list(0, 2, "12345")(FakeRequest())
 
       status(result) must equalTo(OK)
-      contentAsString(result) must contain("13 computers found")
+      contentAsString(result) must contain("One property found")
 
     }
 
-    "create new computer" in new WithApplication {
+    "create new property" in new WithApplication {
       val badResult = applicationController.save(FakeRequest())
 
       status(badResult) must equalTo(BAD_REQUEST)
 
       val badDateFormat = applicationController.save(
-        FakeRequest().withFormUrlEncodedBody("name" -> "FooBar", "introduced" -> "badbadbad", "company" -> "1")
+        FakeRequest().withFormUrlEncodedBody(
+          "name" -> "FooBar",
+          "introduced" -> "badbadbad",
+          "company" -> "1")
       )
 
       status(badDateFormat) must equalTo(BAD_REQUEST)
@@ -57,17 +60,20 @@ class ApplicationSpec extends PlaySpecification {
       contentAsString(badDateFormat) must contain("""<input type="text" id="name" name="name" value="FooBar" />""")
 
       val result = applicationController.save(
-        FakeRequest().withFormUrlEncodedBody("name" -> "FooBar", "introduced" -> "2011-12-24", "company" -> "1")
+        FakeRequest().withFormUrlEncodedBody(
+          "name" -> "FooBar",
+          "introduced" -> "2011-12-24",
+          "company" -> "1")
       )
 
       status(result) must equalTo(SEE_OTHER)
-      redirectLocation(result) must beSome.which(_ == "/computers")
-      flash(result).get("success") must beSome.which(_ == "Computer FooBar has been created")
+      redirectLocation(result) must beSome.which(_ == "/properties")
+      flash(result).get("success") must beSome.which(_ == "property FooBar has been created")
 
       val list = applicationController.list(0, 2, "FooBar")(FakeRequest())
 
       status(list) must equalTo(OK)
-      contentAsString(list) must contain("One computer found")
+      contentAsString(list) must contain("One property found")
     }
   }
 

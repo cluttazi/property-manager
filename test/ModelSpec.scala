@@ -40,12 +40,12 @@ class ModelSpec extends Specification {
       property.longitude must equalTo(33.00)
       property.bedrooms must equalTo(None)
       property.surface must equalTo(None)
-      property.price must equalTo(1.0)
+      property.price must equalTo(100.0)
     }
 
     "have prices histories" in new WithApplication {
       lazy val price = Await.result(pricesHistoriesDao.findByProperty(1L), Duration.Inf)
-      price.size must equalTo(1)
+      price.size must equalTo(2)
     }
 
     "be updated if needed, and change price history" in new WithApplication {
@@ -70,7 +70,7 @@ class ModelSpec extends Specification {
       pricesHistoriesDao.insert(PriceHistory(Some(Enums.emptyLong), updated.id, System.currentTimeMillis, updated.price))
 
       lazy val price = Await.result(pricesHistoriesDao.findByProperty(1L), Duration.Inf)
-      price.size must equalTo(2)
+      price.size must equalTo(3)
 
     }
 

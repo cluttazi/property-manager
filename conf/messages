@@ -1,3 +1,4 @@
 # Messages
 
 properties.list.title={0,choice,0#No properties|1#One property|1<{0,number,integer} properties} found
+prices.list.title={0,choice,0#No prices|1#One price|1<{0,number,integer} prices} found

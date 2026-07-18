@@ -1,3 +1,10 @@
 target/
+project/target/
+project/project/
+.bsp/
+.bloop/
+.metals/
+.idea/
 *.iml
-*.idea
+RUNNING_PID
+logs/

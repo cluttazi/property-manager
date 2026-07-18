@@ -14,6 +14,8 @@ import scala.concurrent.duration.Duration
 
 class ModelSpec extends Specification {
 
+  sequential
+
   // -- Date helpers
 
   def dateIs(date: java.util.Date, str: String) = new java.text.SimpleDateFormat("yyyy-MM-dd").format(date) == str
@@ -67,7 +69,7 @@ class ModelSpec extends Specification {
       updated.surface must equalTo(Some(3.4))
       updated.price must equalTo(2.0)
 
-      pricesHistoriesDao.insert(PriceHistory(Some(Enums.emptyLong), updated.id, System.currentTimeMillis, updated.price))
+      Await.result(pricesHistoriesDao.insert(PriceHistory(Some(Enums.emptyLong), updated.id, System.currentTimeMillis, updated.price)), Duration.Inf)
 
       lazy val price = Await.result(pricesHistoriesDao.findByProperty(1L), Duration.Inf)
       price.size must equalTo(3)

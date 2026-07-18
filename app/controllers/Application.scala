@@ -85,7 +85,7 @@ class Application @Inject()(
     * @param id Id of the property to edit
     */
   def update(id: Long) = Action.async { implicit rs =>
-    propertyForm.bindFromRequest.fold(
+    propertyForm.bindFromRequest().fold(
       formWithErrors => scala.concurrent.Future {
         BadRequest(html.editForm(id, formWithErrors))
       },
@@ -110,7 +110,7 @@ class Application @Inject()(
 
   /** Handle the 'new property form' submission. */
   def save = Action.async { implicit rs =>
-    propertyForm.bindFromRequest.fold(
+    propertyForm.bindFromRequest().fold(
       formWithErrors => scala.concurrent.Future {
         BadRequest(html.createForm(formWithErrors))
       },

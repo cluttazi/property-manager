@@ -8,17 +8,17 @@
 
 <h1>Add a property</h1>
 
-@form(routes.Application.save()) {
+@form(routes.Application.save) {
 
 <fieldset>
 
-    @inputText(propertyForm("address"), '_label -> "address")
-    @inputText(propertyForm("postcode"), '_label -> "postcode")
-    @inputText(propertyForm("latitude"), '_label -> "latitude")
-    @inputText(propertyForm("longitude"), '_label -> "longitude")
-    @inputText(propertyForm("surface"), '_label -> "surface")
-    @inputText(propertyForm("bedrooms"), '_label -> "bedrooms")
-    @inputText(propertyForm("price"), '_label -> "price")
+    @inputText(propertyForm("address"), Symbol("_label") -> "address")
+    @inputText(propertyForm("postcode"), Symbol("_label") -> "postcode")
+    @inputText(propertyForm("latitude"), Symbol("_label") -> "latitude")
+    @inputText(propertyForm("longitude"), Symbol("_label") -> "longitude")
+    @inputText(propertyForm("surface"), Symbol("_label") -> "surface")
+    @inputText(propertyForm("bedrooms"), Symbol("_label") -> "bedrooms")
+    @inputText(propertyForm("price"), Symbol("_label") -> "price")
 
 
 </fieldset>

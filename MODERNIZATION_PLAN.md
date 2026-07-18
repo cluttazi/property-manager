@@ -127,6 +127,10 @@ Recorded verbatim: `could not retrieve sbt 0.13.16`.
      and fetching `/` and `/prices`.
   5. `/prices` rendered the raw i18n key `prices.list.title`; message
      added.
+  6. Flaky ModelSpec: an un-awaited insert plus specs2's default
+     concurrent example execution over a shared named in-memory DB caused
+     intermittent failures (observed once). Insert awaited, spec made
+     sequential; suite passed 3 consecutive full runs.
 - **Security**: committed (commented-out) `play.http.secret.key` removed
   from `application.conf`; production secret now comes from the
   `APPLICATION_SECRET` env var. H2 CVE-2021-42392 / CVE-2022-23221 /

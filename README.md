@@ -15,9 +15,9 @@ A small property-management CRUD app built with Play Framework 3.0 (Scala
 sbt run
 ```
 
-Then open <http://localhost:9000>. Database evolutions are applied on first
-request (click "Apply this script now!" if prompted in dev mode); the
-in-memory H2 database is seeded with one example property.
+Then open <http://localhost:9000>. Database evolutions are applied
+automatically on startup and the in-memory H2 database is seeded with one
+example property.
 
 ## Test
 

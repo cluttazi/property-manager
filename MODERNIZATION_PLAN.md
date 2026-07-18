@@ -98,4 +98,91 @@ Recorded verbatim: `could not retrieve sbt 0.13.16`.
 
 ## Done vs Deferred
 
-Filled in at the end of the work — see bottom of file.
+### Done
+
+- **Toolchain**: sbt 0.13.16 → 1.11.7, Scala 2.12.4 → 2.13.18
+  (2.11 cross-build dropped), builds and tests on Java 21.
+- **Framework**: Play 2.6.13 (`com.typesafe.play`) → Play 3.0.11
+  (`org.playframework`, Pekko-based). Akka is gone from the dependency
+  tree, which also settles the Akka BSL licensing question.
+- **Libraries**: play-slick 3.0.3 → 6.2.0, Slick 3.2.1 → 3.6.1,
+  H2 1.4.196 → 2.3.232, play-specs2 via Play 3.0.11; explicit
+  fluentlenium 3.2.0 and redundant play-jdbc-* pins removed.
+- **Deprecated APIs**: `bindFromRequest()` parens, parameterless reverse
+  routes, `Symbol("...")` instead of symbol literals in views, Guice
+  `configure()` override, logback `converterClass` → `class`,
+  FluentLenium package `org.*` → `io.*`, dead `application.name` key
+  removed.
+- **Bug fixes** (each verified by tests):
+  1. Evolutions schema types: `PROPERTY.SURFACE` BIGINT → DOUBLE (values
+     were silently truncated), `PRICEHISTORY.PRICE` VARCHAR → DOUBLE.
+  2. `update()`/`delete()` discarded the first DAO Future (write race,
+     swallowed errors) — now properly sequenced; regression test added.
+  3. `ApplicationSpec` revived (was 100% commented out over "random CSRF
+     issues") using `CSRFTokenHelper.withCSRFToken` — 5 controller
+     examples restored plus 1 new regression example.
+  4. Dev-mode evolutions loop (the "SLICK in DEV mode" bug from the old
+     README): fixed via `play.evolutions.db.default.autoApply=true`
+     (safe: in-memory disposable DB only). Verified by booting `sbt run`
+     and fetching `/` and `/prices`.
+  5. `/prices` rendered the raw i18n key `prices.list.title`; message
+     added.
+- **Security**: committed (commented-out) `play.http.secret.key` removed
+  from `application.conf`; production secret now comes from the
+  `APPLICATION_SECRET` env var. H2 CVE-2021-42392 / CVE-2022-23221 /
+  CVE-2021-23463 resolved by the 2.3.232 upgrade; all EOL Play 2.6 /
+  Akka 2.5 era transitive dependencies replaced by the Play 3 line.
+- **Hygiene**: `.gitignore` covers sbt 1.x/BSP/IDE artifacts; README
+  rewritten with accurate run/test instructions.
+- **CI**: workflow now tests on Temurin JDK 21 (checkout@v4,
+  setup-java@v4, sbt/setup-sbt@v1 with sbt caching were already current);
+  the `sbt test` command mirrors what was verified locally.
+
+Test status: baseline **could not run at all** (sbt 0.13.16 unresolvable,
+Java-21-only environment). Final: **10 examples, 0 failures** (ModelSpec 3,
+ApplicationSpec 6, IntegrationSpec 1 — the HtmlUnit full-browser flow),
+plus a manual dev-mode boot check.
+
+### Deferred (deliberate)
+
+- **Secret rotation**: the previously committed secret should be treated
+  as leaked and rotated wherever it may have been deployed — operator
+  action, not done here.
+- **Scala 3 / Play 3.1**: Play 3.1 was not yet the settled stable line at
+  the audit cutoff; Scala 3 offers little for ~620 LOC and would churn
+  every file. Revisit when Play 3.1.x is established.
+- **UI/assets**: 2012-era Bootstrap CSS left untouched (behavior-neutral
+  modernization only).
+- **Persistent database**: in-memory H2 is intentional for this demo;
+  no move to file-based/persistent storage.
+- **Ordering/`orderBy` parameter**: the `list` endpoints accept an
+  `orderBy` argument that the DAOs ignore (pre-existing). Left as-is —
+  implementing it would be a behavior change, not a modernization.
+
+## PR-style summary
+
+**Modernize property-manager: Play 2.6/Scala 2.12/sbt 0.13 → Play 3.0.11/
+Scala 2.13.18/sbt 1.11.7 on Java 21**
+
+This branch takes the app from a 2017 stack that no longer builds at all
+(sbt 0.13 artifacts unresolvable, JDK-8-only) to the current community
+Play line, with zero route/behavior changes apart from documented bug
+fixes.
+
+Changes: toolchain and framework migration (Pekko-based Play 3, play-slick
+6, Slick 3.6, H2 2.3); deprecated-API cleanup (forms, reverse routes,
+symbol literals, Guice, logback); four real bug fixes with regression
+coverage (schema type truncation, unsequenced DAO futures, dev-mode
+evolutions loop, missing i18n key); revival of the fully-commented-out
+controller spec via CSRF test helpers; secret moved to an env var; CI on
+JDK 21.
+
+Risks: H2 2.x is stricter SQL-wise than 1.4 (mitigated by fixing the two
+mistyped columns; full suite green); FluentLenium/HtmlUnit major-version
+jump in the browser test (suite green); `autoApply` evolutions now also
+apply in prod mode — acceptable because the app only targets a disposable
+in-memory DB.
+
+Untouched: routes, public URLs, templates' rendered output, `public/`
+assets, LICENSE, seed data.
+

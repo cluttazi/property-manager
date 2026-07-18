@@ -91,10 +91,8 @@ class Application @Inject()(
       },
       property => {
         for {
-          _ <- {
-            propertiesDAO.update(id, property)
-            pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), Some(id), System.currentTimeMillis, property.price))
-          }
+          _ <- propertiesDAO.update(id, property)
+          _ <- pricesHistoriesDAO.insert(PriceHistory(Some(Enums.emptyLong), Some(id), System.currentTimeMillis, property.price))
         } yield
           Home.flashing("success" -> s"Property ${id} has been updated")
       }
@@ -127,10 +125,8 @@ class Application @Inject()(
   /** Handle computer deletion. */
   def delete(id: Long) = Action.async { implicit rs =>
     for {
-      _ <- {
-        propertiesDAO.delete(id)
-        pricesHistoriesDAO.deleteByProperty(id)
-      }
+      _ <- propertiesDAO.delete(id)
+      _ <- pricesHistoriesDAO.deleteByProperty(id)
     } yield Home.flashing("success" -> "Property has been deleted")
   }
 }

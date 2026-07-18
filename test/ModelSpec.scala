@@ -64,7 +64,7 @@ class ModelSpec extends Specification {
       updated.latitude must equalTo(34.00)
       updated.longitude must equalTo(34.00)
       updated.bedrooms must equalTo(Some(2))
-      updated.surface must equalTo(Some(3.0))
+      updated.surface must equalTo(Some(3.4))
       updated.price must equalTo(2.0)
 
       pricesHistoriesDao.insert(PriceHistory(Some(Enums.emptyLong), updated.id, System.currentTimeMillis, updated.price))
